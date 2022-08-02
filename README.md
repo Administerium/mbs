@@ -17,12 +17,12 @@ First download the correct executable for your OS. We currently support Linux/Wi
 more systems, where a python interpreter is available. 
 
 If you have a python interpreter on your system, you can also do 
-<code>pip install https://github.com/Administerium/mbs.git </code>. That way it will also create an <code>mbs</code> shortcut in 
+<code>pip install git+https://github.com/Administerium/mbs.git </code>. That way it will also create an <code>mbs</code> shortcut in 
 your systems path, so that mbs is available system-wide.
 
 You can use<code>mbs <command> --help</code>, to get more detailed help to some options.
 
-## First steps
+### First steps
 
 Create an empty directory and run:
 
