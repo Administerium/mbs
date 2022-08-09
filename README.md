@@ -147,11 +147,7 @@ SELECT TOP {{ limit|default(10) }} * FROM mytable
 
 ## Status
 
-Beta - Contributions are very welcome. 
-
-There are many nice to have features not implemented:
-
- * <code>mbs update [myfile]</code> - Update only parts (like visualisation settings or everything but the query) from metabase to the file
+Beta - Contributions are very welcome.
 
 ## Building an executable
 
