@@ -15,7 +15,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'mbs = mbs.__main__:cli',
+            'mbs = mbs.__main__:entrypoint',
         ],
     },
 )

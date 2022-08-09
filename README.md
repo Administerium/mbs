@@ -18,7 +18,7 @@ more systems, where a python interpreter is available.
 
 If you have a python interpreter on your system, you can also do 
 <code>pip install git+https://github.com/Administerium/mbs.git </code>. That way it will also create an <code>mbs</code> shortcut in 
-your systems path, so that mbs is available system-wide.
+your system path, so that mbs is available system-wide.
 
 You can use<code>mbs <command> --help</code>, to get more detailed help to some options.
 
@@ -35,13 +35,13 @@ Then run in this directory:
     > mbs login Myusername Mypassword
     Login successful.
 
-to login to your instance. The credentials with the session cookie will be saved on your local home directory (Windows: 
+to log into your instance. The credentials with the session cookie will be saved on your local home directory (Windows: 
 <code>C:\Users\<username>\AppData\Local\mbs\mbs\remotes.json</code>, Linux: <code>~/.config/mbs/remotes.json</code>).
 
-Now go into Metabase and add the text snippet <code>## mbs_controlled ##</code> into the sql query as a comment. 
-(<code>--## mbs_controlled ##</code> in most cases).
+Now go into Metabase and add the text snippet <code>## mbs_controlled ##</code> into the sql query as a comment 
+(<code>--## mbs_controlled ##</code> in most cases) or in the question description.
 This will mark this question as under the control of MBS. Only question (or cards, as they are called in the metabase 
-API) with this string in the SQL query are handled by MBS. 
+API) with this string are handled by MBS. 
 
 Now pull this cards/questions from metabase to this directory:
 
@@ -59,7 +59,21 @@ you can push your files back into metabase:
 
     > mbs push test3.json
 
-You can also push all files by not giving a filename, so be careful about that.
+You can also push all files at once by not giving a filename, so be careful about that.
+
+Now edit your question/card in Metabase. To configure metabase variables, you have to go into the sql editor and 
+delete and add a character on the variable. That way the properties sidebar opens, and you can configure the variable.
+After that it would be cool to merge your changes back into your file, right?
+So we do just that.
+
+    > mbs merge test3.json
+
+With that we merge everything back, but keep the native SQL part in the file as it is. 
+(In fact the only thing kept is the [dataset_query][native][query] value, everything else is overwritten. 
+That may get more fine-tuning in the future.) 
+You can also merge all files at once by not giving a filename, so be VERY careful about that.
+
+Best practice: Keep your MBS repo under a versioning system like git.
 
 ## Jinja2
 
@@ -81,8 +95,8 @@ Jinja2 is a very feature rich templating system. Documentation: https://jinja.pa
     ...
 ```
 The <code>{% filter json %}</code> is needed, to escape the SQL file to JSON. You also see, that the mbs tag 
-(<code>--## mbs_controlled ##</code>) has to be somewhere in the query: In the included file or just before the 
-include statement.
+(<code>--## mbs_controlled ##</code>) has to be somewhere: In the included file, just before the 
+include statement or in the question's description.
 
 <code>test.sql</code>:
 ```
@@ -124,6 +138,13 @@ Metabase is also using double curly braces, so we have to escape them with <code
 SELECT TOP 1000 * FROM mytable {% if is_mbs %}{{'{{ bananas }}'}}{% endif %}
 ```
 
+#### Default values
+
+Set some defaults, in case the variables where not set on include.
+```
+SELECT TOP {{ limit|default(10) }} * FROM mytable
+```
+
 ## Status
 
 Beta - Contributions are very welcome. 
@@ -134,10 +155,40 @@ There are many nice to have features not implemented:
 
 ## Building an executable
 
-Setup a python 3.8+ venv and run this inside:
+Tested on Ubuntu 20.04 and Windows 11.
 
-    git clone <url_to_the_github_repo>
+Set up a python 3.8+ venv and run this inside:
+
+    git clone https://github.com/Administerium/mbs.git
     pip install -r requirements.txt
     pyinstaller -y --clean .\mbs.spec
 
-You'll get an mbs executable in the dist folder.
+You'll get a mbs executable in the dist folder.
+
+## Use the templates in another project
+
+Mbs is using the render function in a very standard way. If you only render the sql files in your project, you don't 
+need to read further, just render them with jinja2.
+
+If you try to use the metabase json files outside metabase, you have to look at this:
+There is a special json filter, that escapes sql to include it into a json field.
+That speciality is needed, because when you just use <code>json.dumps()</code> with a string, the output has quotes 
+around and that's the standard filter behavior. This destroys json syntax highlighting in many editors and is ugly.
+So we fix this with this filter:
+```
+jenv = jinja2.Environment(
+    autoescape=False,
+    ...  # your other jinja2 options
+)
+jenv.filters['json'] = lambda a: json.dumps(a)[1:-1]
+```
+That way your editor better renders the json syntax, when you write it like this:
+
+```
+...
+    native": {
+        "query": "{% filter json %}{% include 'activity.sql' %}{% endfilter %}",
+        "template-tags": {}
+    },
+...
+```
