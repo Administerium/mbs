@@ -228,18 +228,21 @@ class Metabase:
             filename = f"{card['id']} - {title}.json"
         if not os.path.isfile(f"{filename}") or overwrite:
             # filter out some unnecessary values, that metabase will manage himself
-            del card["created_at"]
-            del card["creator"]
-            del card["creator_id"]
-            del card["last-edit-info"]
-            del card["made_public_by_id"]
-            del card["public_uuid"]
-            del card["updated_at"]
-            del card["embedding_params"]
-            del card["enable_embedding"]
-            del card["average_query_time"]
-            del card["last_query_start"]
-            del card["moderation_reviews"]
+            try:
+                del card["created_at"]
+                del card["creator"]
+                del card["creator_id"]
+                del card["last-edit-info"]
+                del card["made_public_by_id"]
+                del card["public_uuid"]
+                del card["updated_at"]
+                del card["embedding_params"]
+                del card["enable_embedding"]
+                del card["average_query_time"]
+                del card["last_query_start"]
+                del card["moderation_reviews"]
+            except KeyError:
+                pass
 
             with open(f"{filename}", "w") as f:
                 json.dump(card, f, sort_keys=True, indent=4)

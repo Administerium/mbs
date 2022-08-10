@@ -25,7 +25,7 @@ click_log.basic_config(logger)
 
 
 __author__ = "Robert Lieback"
-__version__ = '1.0-beta.2'
+__version__ = '1.0-beta.3'
 
 
 @click.group()
@@ -125,7 +125,7 @@ def entrypoint():
         logger.critical(ex)
         sys.exit(-2)
     except Exception as ex:
-        logger.error(ex)
+        logger.error(f"{type(ex).__name__}: {ex}")
 
 
 if __name__ == "__main__":
